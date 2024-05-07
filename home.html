@@ -1,46 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website - Home</title>
-    <style>
-        /* Add your CSS styles here */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Welcome to My Website</h1>
-        </header>
-        <nav>
-            <ul>
-                <li><a href="home.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
-        <main>
-            <h2>Home Page Content</h2>
-            <p>This is the content of your home page. You can replace this with your own content.</p>
-        </main>
-        <footer>
-            <p>&copy; 2024 Your Website. All rights reserved.</p>
-        </footer>
-    </div>
-</body>
-</html>
+from google.cloud import storage
+import requests
+
+# Set up Google Cloud Storage client
+client = storage.Client()
+
+# Upload the image to Google Cloud Storage
+bucket = client.get_bucket("YOUR_BUCKET_NAME")
+blob = bucket.blob("image.jpg")
+blob.upload_from_filename("/path/to/your/image.jpg")
+
+# Get the URL of the uploaded image
+image_url = blob.public_url
+
+# Set up the payload for ChatGPT-4
+payload = {
+    "model": "text-davinci-003",
+    "prompt": "Generate a caption for this image:",
+    "images": [image_url],
+    "max_tokens": 50
+}
+
+# Send the request to ChatGPT-4
+response = requests.post("https://api.openai.com/v1/completions", json=payload, headers=headers)
+
+# Print the generated text response
+print(response.json()["choices"][0]["text"])
