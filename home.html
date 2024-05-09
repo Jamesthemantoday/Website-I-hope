@@ -5,28 +5,28 @@ import aiohttp
 import asyncio
 import digitalio
 import board
-import st7789
+import ST7789 as st7789
 
-# LCD setup for Waveshare 1.69-inch display
-cs_pin = digitalio.DigitalInOut(board.CE0)
-dc_pin = digitalio.DigitalInOut(board.D25)
-reset_pin = digitalio.DigitalInOut(board.D24)
-BL_pin = digitalio.DigitalInOut(board.D26)  # Backlight
+# Define the pins connected to the LCD
+cs_pin = digitalio.DigitalInOut(board.CE0)  # Chip select
+dc_pin = digitalio.DigitalInOut(board.D25)  # Data/command
+reset_pin = digitalio.DigitalInOut(board.D24)  # Reset
+BL_pin = digitalio.DigitalInOut(board.D26)  # Backlight, if applicable
 BL_pin.switch_to_output()
 
+# Setup SPI
 spi = board.SPI()
+
+# Create the LCD display instance
 lcd = st7789.ST7789(
-    spi,
-    240, 280,
-    cs=cs_pin,
-    dc=dc_pin,
+    spi, 
+    width=240, 
+    height=280, 
+    cs=cs_pin, 
+    dc=dc_pin, 
     rst=reset_pin,
     baudrate=64000000
 )
-
-# Initialize the display
-lcd.init()
-lcd.fill(st7789.BLACK)  # Clear the screen
 
 # Cache dictionary for storing OCR results
 cache = {}
@@ -55,11 +55,9 @@ def ocr_space_file(filename, api_key):
 
 def send_to_lcd(text):
     lcd.fill(st7789.BLACK)  # Clear display to black
-    lines = textwrap.wrap(text, width=30)  # Wrap text to fit the display
-    y = 10
-    for line in lines:
-        lcd.text(line, 10, y, st7789.WHITE)
-        y += 10  # Adjust y increment based on font size and spacing
+    # This will need to be replaced with your method of displaying text
+    # For now, assuming a simple text display function is available
+    lcd.text(text, 10, 10, st7789.WHITE)
 
 async def ask_chatgpt_async(question, openai_api_key):
     url = 'https://api.openai.com/v1/completions'
