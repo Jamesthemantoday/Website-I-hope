@@ -1,6 +1,5 @@
 import hashlib
 import requests
-import time
 import aiohttp
 import asyncio
 import digitalio
@@ -17,16 +16,20 @@ BL_pin.switch_to_output()
 # Setup SPI
 spi = board.SPI()
 
-# Create the LCD display instance
-lcd = st7789.ST7789(
-    spi, 
-    width=240, 
-    height=280, 
-    cs=cs_pin, 
-    dc=dc_pin, 
-    rst=reset_pin,
-    baudrate=64000000
-)
+# Create the LCD display instance with error handling
+try:
+    lcd = st7789.ST7789(
+        spi, 
+        width=240, 
+        height=280, 
+        cs=cs_pin, 
+        dc=dc_pin, 
+        rst=reset_pin,
+        baudrate=40000000  # Adjusted baudrate
+    )
+    BL_pin.value = True  # Ensure backlight is turned on if applicable
+except Exception as e:
+    print(f"Failed to initialize LCD: {str(e)}")
 
 # Cache dictionary for storing OCR results
 cache = {}
@@ -54,10 +57,12 @@ def ocr_space_file(filename, api_key):
     return response.json()
 
 def send_to_lcd(text):
-    lcd.fill(st7789.BLACK)  # Clear display to black
-    # This will need to be replaced with your method of displaying text
-    # For now, assuming a simple text display function is available
-    lcd.text(text, 10, 10, st7789.WHITE)
+    try:
+        lcd.fill(st7789.BLACK)  # Clear display to black
+        # Assuming a simple text display function is available (to be replaced as needed)
+        lcd.text(text, 10, 10, st7789.WHITE)
+    except Exception as e:
+        print(f"Failed to display text on LCD: {str(e)}")
 
 async def ask_chatgpt_async(question, openai_api_key):
     url = 'https://api.openai.com/v1/completions'
