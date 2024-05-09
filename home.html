@@ -70,15 +70,23 @@ def main(filename, question, ocr_api_key, openai_api_key):
     ocr_result = ocr_space_file_with_cache(filename, ocr_api_key)
     print("OCR Result:", ocr_result)
 
-    # Using asyncio to call ChatGPT asynchronously
+    # Extract the necessary text
+    if 'ParsedResults' in ocr_result and len(ocr_result['ParsedResults']) > 0:
+        parsed_text = ocr_result['ParsedResults'][0].get('ParsedText', '')
+        print("Extracted Text:", parsed_text)
+    else:
+        print("No text found or error in OCR")
+        return
+
+    # Using asyncio to call ChatGPT asynchronously with the parsed text
     loop = asyncio.get_event_loop()
-    chatgpt_response = loop.run_until_complete(ask_chatgpt_async(question, openai_api_key))
+    chatgpt_response = loop.run_until_complete(ask_chatgpt_async(parsed_text, openai_api_key))
     print("ChatGPT Response:", chatgpt_response)
 
 # Example usage
 if __name__ == "__main__":
     filename = '/home/jasalat/text.jpg'
-    question = "Solve this question"
+    question = "Solve this question or atleast make sense of it"
     ocr_api_key = "Your_OCR_API_Key"
     openai_api_key = "Your_OpenAI_API_Key"
     main(filename, question, ocr_api_key, openai_api_key)
